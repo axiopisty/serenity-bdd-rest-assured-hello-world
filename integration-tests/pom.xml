@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.example</groupId>
+    <artifactId>serenity-rest-assured-hello-world</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>integration-tests</artifactId>
+
+  <properties>
+    <tags/>
+    <docker.skip>false</docker.skip>
+    <docker.host.address>localhost</docker.host.address>
+
+    <serenity.version>3.6.21</serenity.version>
+    <cucumber.version>7.11.2</cucumber.version>
+    <junit-platform.version>1.9.2</junit-platform.version>
+
+  </properties>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <!--
+          The image(s) created by this plugin are used to run integration tests
+          against docker containers during a maven build. It is very similar to
+          using docker-compose, except it is integrated into the maven life cycle.
+
+          For configuration details see: https://dmp.fabric8.io/
+        -->
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>${docker-maven-plugin.version}</version>
+        <configuration>
+          <skip>${docker.skip}</skip>
+          <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
+          <verbose>true</verbose>
+          <skipPush>true</skipPush>
+          <containerNamePattern>%a</containerNamePattern>
+          <images>
+            <image>
+              <alias>api</alias>
+              <name>api</name>
+              <build>
+                <contextDir>${project.parent.basedir}/docker-compose/api/</contextDir>
+                <dockerFile>Dockerfile</dockerFile>
+                <nocache/>
+                <cleanup>remove</cleanup>
+              </build>
+              <run>
+                <hostname>api</hostname>
+                <ports>
+                  <port>api.port:8080</port>
+                </ports>
+                <wait>
+                  <!-- Wait up to 30 seconds for the application to be ready. Otherwise, fail the build. -->
+                  <log>Started Main in </log>
+                  <time>30000</time>
+                </wait>
+                <log>
+                  <enabled>true</enabled>
+                </log>
+              </run>
+            </image>
+          </images>
+        </configuration>
+        <executions>
+          <execution>
+            <id>docker-build</id>
+            <phase>package</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>prepare-it-database</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>remove-it-database</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+              <goal>volume-remove</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <!-- Integration Tests  -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${maven-failsafe-plugin.version}</version>
+        <configuration>
+          <argLine>@{argLine} -Duser.timezone=America/Denver</argLine>
+          <summaryFile>${project.build.directory}/surefire-reports/failsafe-summary.xml</summaryFile>
+          <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+          <systemPropertyVariables>
+            <DOCKER_HOST>${docker.host.address}</DOCKER_HOST>
+            <DOCKER_PORT>${api.port}</DOCKER_PORT>
+          </systemPropertyVariables>
+          <includes>
+            <include>**/*IntegrationTest.java</include>
+          </includes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>net.serenity-bdd.maven.plugins</groupId>
+        <artifactId>serenity-maven-plugin</artifactId>
+        <version>${serenity.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>net.serenity-bdd</groupId>
+            <artifactId>serenity-core</artifactId>
+            <version>${serenity.version}</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <tags>${tags}</tags>
+        </configuration>
+        <executions>
+          <execution>
+            <id>serenity-reports</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>aggregate</goal>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>
