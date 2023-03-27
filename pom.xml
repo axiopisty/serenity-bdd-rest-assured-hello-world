@@ -11,10 +11,8 @@
   </parent>
 
   <groupId>com.example</groupId>
-  <artifactId>serenity-rest-assured-bug</artifactId>
+  <artifactId>serenity-rest-assured-hello-world</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>serenity-rest-assured-bug</name>
-  <description>Demo project for Spring Boot</description>
   <packaging>pom</packaging>
 
   <modules>
