@@ -1,4 +1,4 @@
-package com.example.serenityrestassuredbug;
+package com.example.serenity.rest.assured.hello.world;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

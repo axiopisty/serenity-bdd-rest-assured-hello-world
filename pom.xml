@@ -39,6 +39,8 @@
     <maven-surefire-report-plugin.version>${maven-failsafe-plugin.version}</maven-surefire-report-plugin.version>
     <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
 
+    <skipTests>false</skipTests>
+
   </properties>
 
   <build>
@@ -151,10 +153,10 @@
                   <scopes>
                     <scope>compile</scope>
                     <scope>provided</scope>
-                    <scope>test</scope>
+                    <!--<scope>test</scope>-->
                   </scopes>
                   <findAllDuplicates>true</findAllDuplicates>
-                  <!--<ignoreWhenIdentical>true</ignoreWhenIdentical>-->
+                  <ignoreWhenIdentical>true</ignoreWhenIdentical>
                 </banDuplicateClasses>
               </rules>
               <fail>true</fail>

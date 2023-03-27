@@ -1,4 +1,4 @@
-package com.example.serenityrestassuredbug;
+package com.example.serenity.rest.assured.hello.world;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
